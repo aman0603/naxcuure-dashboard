@@ -81,7 +81,6 @@ router.delete(
 // GET /api/sops/:id/download — Download SOP
 router.get(
   "/:id/download",
-  authorizeDesignation("QA Head", "Director", "Staff", "Manager"),
   downloadSOP
 );
 

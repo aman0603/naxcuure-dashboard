@@ -208,14 +208,7 @@ function App() {
 <Route
   path="sops"
   element={
-    <ProtectedRoute 
-      allowedRoles={['Director', 'President Operations', 'Head']}
-      customCheck={(user) => 
-        user.role === 'Director' || 
-        user.role === 'President Operations' || 
-        (user.role === 'Head' && user.department === 'QA')
-      }
-    >
+    <ProtectedRoute>
       <SOPPage />
     </ProtectedRoute>
   }

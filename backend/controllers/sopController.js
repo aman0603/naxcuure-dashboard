@@ -13,7 +13,11 @@ exports.getAllSOPs = async (req, res) => {
     const filter = {};
     if (!["Director", "QA Head", "President Operations"].includes(req.user.designation)) {
       filter.status = "Active";
-      filter.department = req.user.department?.name || req.user.department;
+      // Handle different department formats
+      const userDepartment = req.user.department?.name || req.user.department || (Array.isArray(req.user.departments) && req.user.departments.length > 0 ? req.user.departments[0] : null);
+      if (userDepartment) {
+        filter.department = userDepartment;
+      }
     }
 
     const sops = await SOP.find(filter)
@@ -238,8 +242,10 @@ exports.downloadSOP = async (req, res) => {
     const sop = await SOP.findById(req.params.id);
     if (!sop) return res.status(404).json({ message: "SOP not found" });
 
-    const isPrivileged = ["Director", "QA Head"].includes(req.user.designation);
-    const isSameDept = sop.department === (req.user.department?.name || req.user.department);
+    const isPrivileged = ["Director", "QA Head", "President Operations"].includes(req.user.designation);
+    // Handle different department formats
+    const userDepartment = req.user.department?.name || req.user.department || (Array.isArray(req.user.departments) && req.user.departments.length > 0 ? req.user.departments[0] : null);
+    const isSameDept = userDepartment && sop.department && (sop.department === userDepartment || sop.department.includes(userDepartment) || userDepartment.includes(sop.department));
 
     if (!isPrivileged && (sop.status !== "Active" || !isSameDept)) {
       return res.status(403).json({ message: "Access denied" });

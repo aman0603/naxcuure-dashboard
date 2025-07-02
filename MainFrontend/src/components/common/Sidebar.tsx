@@ -178,26 +178,20 @@ const Sidebar: React.FC = () => {
           )}
 
           {/* SOP */}
-          {(user?.designation === 'Director' ||
-            user?.designation === 'President Operations' ||
-            user?.designation === 'QA Head') && (
-            <>
-              <button
-                onClick={() => setSopOpen(!sopOpen)}
-                className="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors"
-              >
-                {sopOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                <FileText className="w-5 h-5" />
-                <span>SOPs</span>
-              </button>
-              {sopOpen && renderLinks([
-                { path: '/sops', icon: FileText, label: 'View SOPs' },
-                ...(user?.designation === 'Director' || user?.designation === 'President Operations'
-                  ? [{ path: '/sop-requests', icon: ClipboardList, label: 'View Requests' }]
-                  : [])
-              ])}
-            </>
-          )}
+          <button
+            onClick={() => setSopOpen(!sopOpen)}
+            className="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors"
+          >
+            {sopOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            <FileText className="w-5 h-5" />
+            <span>SOPs</span>
+          </button>
+          {sopOpen && renderLinks([
+            { path: '/sops', icon: FileText, label: 'View SOPs' },
+            ...(user?.designation === 'Director' || user?.designation === 'President Operations'
+              ? [{ path: '/sop-requests', icon: ClipboardList, label: 'View Requests' }]
+              : [])
+          ])}
 
           {/* Products */}
           <button
