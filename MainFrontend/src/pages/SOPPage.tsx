@@ -102,9 +102,13 @@ const SOPPage: React.FC = () => {
   const handleDelete = async (sopId: string) => {
     if (window.confirm('Are you sure you want to archive this SOP? Note: This action will move the SOP to Archived status and it will not be permanently deleted.')) {
       try {
-        await sopAPI.deleteSOP(sopId);
+        const response = await sopAPI.deleteSOP(sopId);
         fetchSOPs(); // Refresh the list
-        alert('SOP archived successfully. You can still view it by filtering for Archived status.');
+        if (user?.designation === 'QA Head') {
+          alert('SOP deletion request sent for Director approval. The SOP status is now Pending Deletion.');
+        } else {
+          alert('SOP archived successfully. You can still view it by filtering for Archived status.');
+        }
       } catch (error) {
         console.error('Error archiving SOP:', error);
         alert('Failed to archive SOP');
@@ -147,9 +151,9 @@ const SOPPage: React.FC = () => {
       setFile(null);
       fetchSOPs(); // Refresh the list
       if (user?.designation === 'QA Head') {
-        alert('SOP uploaded successfully. A request for approval has been sent to Director and President Operations.');
+        alert('SOP uploaded successfully with status "Reviewing". A request for approval has been sent to Director and President Operations. The SOP will be active only after approval.');
       } else {
-        alert('SOP uploaded successfully.');
+        alert('SOP uploaded successfully with status "Active".');
       }
     } catch (error) {
       console.error('Error uploading SOP:', error);
