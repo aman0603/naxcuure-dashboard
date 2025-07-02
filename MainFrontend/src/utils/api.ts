@@ -187,3 +187,15 @@ export const performanceAPI = {
   // 📊 Admin view all performance records
   getAllSummary: () => api.get('/performance/summary'),
 };
+
+// ================================
+// 📜 SOP API
+// ================================
+export const sopAPI = {
+  getAllSOPs: () => api.get('/sops'),
+  getSOPById: (id: string) => api.get(`/sops/${id}`),
+  uploadSOP: (data: any) => api.post('/sops', data),
+  updateSOP: (id: string, data: any) => api.put(`/sops/${id}`, data),
+  deleteSOP: (id: string) => api.delete(`/sops/${id}`),
+  downloadSOP: (id: string) => api.get(`/sops/${id}/download`),
+} 

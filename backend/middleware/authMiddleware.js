@@ -51,6 +51,16 @@ exports.authorizeRoles = (...roles) => {
   };
 };
 
+
+exports.authorizeDesignation = (...designations) => {
+  return (req, res, next) => {
+    if (!req.user || !designations.includes(req.user.designation)) {
+      return res.status(403).json({ message: "Forbidden: designation restricted" });
+    }
+    next();
+  };
+};
+
 exports.canEnterGRN = (req, res, next) => {
   const { department, role } = req.user;
 

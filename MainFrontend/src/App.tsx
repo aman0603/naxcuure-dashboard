@@ -25,7 +25,7 @@ import IssueInventory from './pages/IssueInventory';
 import StockOverview from './pages/StockOverview';
 import ClaimInventory from './pages/ClaimInventory';
 import Alert from './pages/Alert';
-
+import SOPPage from './pages/SOPPage';
 
 function App() {
   return (
@@ -204,6 +204,14 @@ function App() {
   }
 />
 
+<Route
+  path="sops"
+  element={
+    <ProtectedRoute>
+      <SOPPage />
+    </ProtectedRoute>
+  }
+/>
 
             <Route path="all-requests" element={<div className="p-8 text-center text-gray-500">All Requests - Coming Soon</div>} />
           </Route>

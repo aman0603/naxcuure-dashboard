@@ -5,40 +5,61 @@ const { storage } = require("../config/cloudinary");
 const upload = multer({ storage });
 
 const {
-  authenticateUser,
-  authorizeRoles,
+  protect,
+  authorizeDesignation,
 } = require("../middleware/authMiddleware");
 
-const sopController = require("../controllers/sopController");
+const {
+  uploadSOP,
+  getAllSOPs,
+  getSOPById,
+  approveSOP,
+  updateSOP,
+  deleteSOP,
+  downloadSOP,
+} = require("../controllers/sopController");
 
+router.use(protect);
 router.post(
-  "/upload",
-  authenticateUser,
-  authorizeRoles("managerHead", "owner"),
+  "/",
+  authorizeDesignation("QA Head", "Director"),
   upload.single("file"),
-  sopController.uploadSOP
+  uploadSOP
 );
 
-router.put(
+// GET /api/sops — Get all SOPs based on user role and department
+router.get("/", getAllSOPs);
+
+// GET /api/sops/:id — Get SOP by ID
+router.get("/:id", getSOPById);
+
+// PATCH /api/sops/:id/approve — Approve SOP (Director only)
+router.patch(
+  "/:id/approve",
+  authorizeDesignation("Director"),
+  approveSOP
+);
+
+// PATCH /api/sops/:id — Update/Modify SOP (Department Head or Director)
+router.patch(
   "/:id",
-  authenticateUser,
-  authorizeRoles("managerHead", "owner"),
-  sopController.updateSOP
+  authorizeDesignation("QA Head", "Director"),
+  upload.single("file"),
+  updateSOP
 );
 
+// DELETE /api/sops/:id — Delete SOP (Director or Department Head with approval)
 router.delete(
   "/:id",
-  authenticateUser,
-  authorizeRoles("owner"),
-  sopController.deleteSOP
+  authorizeDesignation("QA Head", "Director"),
+  deleteSOP
 );
 
-router.get("/search", authenticateUser, sopController.searchSOPs);
-
-router.get("/download/:id", authenticateUser, sopController.downloadSOP);
-
-router.get("/all", authenticateUser, sopController.getAllSOPs);
-
-router.get("/:id", authenticateUser, sopController.getSOPById);
+// GET /api/sops/:id/download — Download SOP
+router.get(
+  "/:id/download",
+  authorizeDesignation("QA Head", "Director", "Staff", "Manager"),
+  downloadSOP
+);
 
 module.exports = router;

@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sopOpen, setSopOpen] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [certsOpen, setCertsOpen] = useState(false);
@@ -26,7 +27,7 @@ const Sidebar: React.FC = () => {
     ...(user?.role === 'Head' || user?.role === 'Manager'
       ? [{ path: '/department-requests', icon: Users, label: 'Department Requests' }]
       : []),
-    ...(user?.role === 'Head' && user.departments?.includes('Warehouse')
+    ...(user?.role === 'Head' && user.department?.includes('Warehouse')
       ? [
           { path: '/issue-inventory', icon: Package, label: 'Issue Inventory' },
           { path: '/stock', icon: BarChart3, label: 'Stock Overview' }
@@ -40,8 +41,8 @@ const Sidebar: React.FC = () => {
   const showAlerts =
     ['Director', 'President Operations', 'Head'].includes(user?.role || '') ||
     (user?.role === 'Head' &&
-      ['Warehouse', 'QA', 'Quality Assurance', 'Production', 'Plant'].some(dep =>
-        user.departments?.includes(dep)
+    ['Warehouse', 'QA', 'Quality Assurance', 'Production', 'Plant'].some(dep =>
+        user.department?.includes(dep)
       ));
 
   const productLinks = [
@@ -176,6 +177,23 @@ const Sidebar: React.FC = () => {
             </>
           )}
 
+          {/* SOP */}
+          {(user?.role === 'Director' ||
+            user?.role === 'President Operations' ||
+            user?.role === 'Head' && user?.department === 'QA') && (
+            <>
+              <button
+                onClick={() => setSopOpen(!sopOpen)}
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors"
+              >
+                {sopOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                <FileText className="w-5 h-5" />
+                <span>SOPs</span>
+              </button>
+              {sopOpen && renderLinks([{ path: '/sops', icon: FileText, label: 'View SOPs' }])}
+            </>
+          )}
+
           {/* Products */}
           <button
             onClick={() => setProductsOpen(!productsOpen)}
@@ -226,7 +244,7 @@ const Sidebar: React.FC = () => {
           <div className="bg-orange-50 rounded-lg p-3">
             <p className="text-xs text-orange-700 mb-1">Logged in as</p>
             <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-            <p className="text-xs text-blue-600">{user?.designation}</p>
+            <p className="text-xs text-blue-600">{user?.role}</p>
           </div>
         </div>
       </aside>

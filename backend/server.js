@@ -10,7 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const manufacturerRoutes = require('./routes/manufacturerRoutes');
 const userRoutes = require('./routes/userRoutes');       // 👥 Users & Leaves
 const holidayRoutes = require('./routes/holidayRoutes'); // 📅 Holidays
-
+const sopsRoutes = require('./routes/sopRoutes'); // 📚 SOPs
 
 dotenv.config();
 const app = express();
@@ -33,6 +33,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/manufacturers', manufacturerRoutes);
 app.use('/api/users', userRoutes);       // User + Leave logic
 app.use('/api/holidays', holidayRoutes); // HR Holiday calendar
+app.use('/api/sops', sopsRoutes); // HR Holiday calendar
 
 // 🌐 Database Connection & Server Start
 mongoose.connect(process.env.MONGODB_URI, {
