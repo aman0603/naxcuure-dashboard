@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, UserPlus } from 'lucide-react';
 import { userAPI } from '../utils/api';
-import { useAuth } from '../contexts/AuthContext';
+import useAuth from '../contexts/AuthContext';
 const DESIGNATION_MAP: Record<string, string[]> = {
   // ❌ Leadership only
   'General Management': ['Director', 'President Operations'],

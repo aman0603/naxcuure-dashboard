@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Eye, EyeOff, Check, X } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import useAuth from '../contexts/AuthContext';
 
 const UpdatePassword: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState('');

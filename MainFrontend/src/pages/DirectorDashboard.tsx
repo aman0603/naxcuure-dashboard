@@ -3,7 +3,7 @@ import {
   CheckCircle2, XCircle, Clock, AlertTriangle, TrendingUp,
   Calendar, AlertCircle, CheckCircle, FileText
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import useAuth from '../contexts/AuthContext';
 import { certificateAPI } from '../utils/api';
 import Modal from '../components/common/Modal';
 import Slider from 'react-slick';

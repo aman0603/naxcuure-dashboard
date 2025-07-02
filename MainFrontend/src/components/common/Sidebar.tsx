@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, FileBadge, Factory, ListOrdered, Building2,
   ClipboardList, PlusCircle, Menu, X, Calendar as CalendarIcon
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import useAuth from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const { user } = useAuth();
@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
     user?.role === 'Head'
       ? [
           { path: '/add-user', icon: Building2, label: 'Add New User' },
-          { path: '/user-management', icon: Users, label: 'User Management' }
+          { path: '/user-management', icon: Users, label: 'User Management' },
         ]
       : [];
 
@@ -178,9 +178,9 @@ const Sidebar: React.FC = () => {
           )}
 
           {/* SOP */}
-          {(user?.role === 'Director' ||
-            user?.role === 'President Operations' ||
-            user?.role === 'Head' && user?.department === 'QA') && (
+          {(user?.designation === 'Director' ||
+            user?.designation === 'President Operations' ||
+            user?.designation === 'QA Head') && (
             <>
               <button
                 onClick={() => setSopOpen(!sopOpen)}
@@ -190,7 +190,12 @@ const Sidebar: React.FC = () => {
                 <FileText className="w-5 h-5" />
                 <span>SOPs</span>
               </button>
-              {sopOpen && renderLinks([{ path: '/sops', icon: FileText, label: 'View SOPs' }])}
+              {sopOpen && renderLinks([
+                { path: '/sops', icon: FileText, label: 'View SOPs' },
+                ...(user?.designation === 'Director' || user?.designation === 'President Operations'
+                  ? [{ path: '/sop-requests', icon: ClipboardList, label: 'View Requests' }]
+                  : [])
+              ])}
             </>
           )}
 

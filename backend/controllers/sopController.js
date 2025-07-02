@@ -11,18 +11,32 @@ const logAudit = async (action, sopId, userId, details) => {
 exports.getAllSOPs = async (req, res) => {
   try {
     const filter = {};
-    if (!["Director", "QA Head"].includes(req.user.designation)) {
+    if (!["Director", "QA Head", "President Operations"].includes(req.user.designation)) {
       filter.status = "Active";
       filter.department = req.user.department?.name || req.user.department;
     }
 
     const sops = await SOP.find(filter)
       .populate("uploadedBy", "name email designation")
+      .populate("approvedBy", "name email designation")
       .sort({ createdAt: -1 });
 
     res.json(sops);
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to fetch SOPs", error: err.message });
+  }
+};
+
+// Get SOPs pending approval (Reviewing status)
+exports.getSOPRequests = async (req, res) => {
+  try {
+    const sops = await SOP.find({ status: "Reviewing" })
+      .populate("uploadedBy", "name email designation")
+      .sort({ createdAt: -1 });
+
+    res.json(sops);
+  } catch (err) {
+    res.status(500).json({ message: "❌ Failed to fetch SOP requests", error: err.message });
   }
 };
 
@@ -56,7 +70,7 @@ exports.uploadSOP = async (req, res) => {
       return res.status(400).json({ message: "❌ PDF file is required" });
     }
 
-    const status = req.user.designation === "Director" ? "Active" : "Reviewing";
+    const status = req.user.designation === "Director" || req.user.designation === "President Operations" ? "Active" : "Reviewing";
 
     const sop = new SOP({
       title,
@@ -72,11 +86,12 @@ exports.uploadSOP = async (req, res) => {
 
     res.status(201).json({ message: `✅ SOP uploaded successfully (Status: ${status})`, sop });
   } catch (err) {
+    console.error('Error uploading SOP:', err);
     res.status(500).json({ message: "❌ Error uploading SOP", error: err.message });
   }
 };
 
-// Approve SOP (Director only)
+// Approve SOP (Director and President Operations)
 exports.approveSOP = async (req, res) => {
   try {
     const sop = await SOP.findById(req.params.id);
@@ -99,6 +114,31 @@ exports.approveSOP = async (req, res) => {
   }
 };
 
+// Reject SOP (Director and President Operations)
+exports.rejectSOP = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const sop = await SOP.findById(req.params.id);
+    if (!sop) return res.status(404).json({ message: "SOP not found" });
+
+    if (sop.status !== "Reviewing") {
+      return res.status(400).json({ message: "SOP is not in Reviewing state" });
+    }
+
+    sop.status = "Draft";
+    sop.rejectedBy = req.user._id;
+    sop.rejectedAt = new Date();
+    sop.rejectionReason = reason;
+    await sop.save();
+
+    await logAudit("Reject", sop._id, req.user._id, `SOP ${sop.title} rejected - ${reason}`);
+
+    res.json({ message: "❌ SOP rejected", sop });
+  } catch (err) {
+    res.status(500).json({ message: "❌ Failed to reject SOP", error: err.message });
+  }
+};
+
 // Update/Modify SOP
 exports.updateSOP = async (req, res) => {
   try {
@@ -111,7 +151,7 @@ exports.updateSOP = async (req, res) => {
     if (req.body.department) updates.department = req.body.department;
     if (req.file?.path) updates.fileUrl = req.file.path;
 
-    updates.status = req.user.designation === "Director" ? "Active" : "Reviewing";
+    updates.status = req.user.designation === "Director" || req.user.designation === "President Operations" ? "Active" : "Reviewing";
     updates.updatedBy = req.user._id;
     updates.updatedAt = new Date();
 
@@ -124,6 +164,7 @@ exports.updateSOP = async (req, res) => {
 
     res.json({ message: `✅ SOP updated (Status: ${updates.status})`, sop: updatedSOP });
   } catch (err) {
+    console.error('Error updating SOP:', err);
     res.status(500).json({ message: "❌ Failed to update SOP", error: err.message });
   }
 };
@@ -154,6 +195,40 @@ exports.deleteSOP = async (req, res) => {
     res.json({ message: "🗑️ SOP archived successfully" });
   } catch (err) {
     res.status(500).json({ message: "❌ Failed to archive SOP", error: err.message });
+  }
+};
+
+// Permanently Delete Archived SOP
+exports.permanentDeleteSOP = async (req, res) => {
+  try {
+    const sop = await SOP.findById(req.params.id);
+    if (!sop) return res.status(404).json({ message: "SOP not found" });
+
+    if (sop.status !== "Archived") {
+      return res.status(400).json({ message: "Only archived SOPs can be permanently deleted" });
+    }
+
+    if (!["Director", "President Operations"].includes(req.user.designation)) {
+      return res.status(403).json({ message: "Access denied: Only Director or President Operations can permanently delete SOPs" });
+    }
+
+    // Delete the file from Cloudinary if it exists
+    if (sop.fileUrl) {
+      try {
+        const publicId = sop.fileUrl.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (error) {
+        console.error('Error deleting file from Cloudinary:', error);
+        // Continue with deletion even if file removal fails
+      }
+    }
+
+    await SOP.findByIdAndDelete(req.params.id);
+    await logAudit("Permanent Delete", sop._id, req.user._id, `SOP ${sop.title} permanently deleted from database`);
+
+    res.json({ message: "🗑️ SOP permanently deleted from database" });
+  } catch (err) {
+    res.status(500).json({ message: "❌ Failed to permanently delete SOP", error: err.message });
   }
 };
 

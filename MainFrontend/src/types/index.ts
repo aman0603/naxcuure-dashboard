@@ -5,6 +5,7 @@ export interface User {
   role: 'Staff' | 'Head' | 'Manager' | 'Warehouse' | 'President Operations' | 'Director';
   department: string;
   email: string;
+  designation: string;
 }
 
 export interface InventoryItem {

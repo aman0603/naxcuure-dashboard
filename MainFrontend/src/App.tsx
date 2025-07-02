@@ -26,6 +26,7 @@ import StockOverview from './pages/StockOverview';
 import ClaimInventory from './pages/ClaimInventory';
 import Alert from './pages/Alert';
 import SOPPage from './pages/SOPPage';
+import SOPRequestsPage from './pages/SOPRequestsPage';
 
 function App() {
   return (
@@ -207,8 +208,23 @@ function App() {
 <Route
   path="sops"
   element={
-    <ProtectedRoute>
+    <ProtectedRoute 
+      allowedRoles={['Director', 'President Operations', 'Head']}
+      customCheck={(user) => 
+        user.role === 'Director' || 
+        user.role === 'President Operations' || 
+        (user.role === 'Head' && user.department === 'QA')
+      }
+    >
       <SOPPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="sop-requests"
+  element={
+    <ProtectedRoute allowedRoles={['Director', 'President Operations']}>
+      <SOPRequestsPage />
     </ProtectedRoute>
   }
 />
