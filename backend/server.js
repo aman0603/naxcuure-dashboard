@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5001;
 
 // 🔐 Middleware
 app.use(cors({
-  origin: ['https://naxcuure-dashboard.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: ['https://naxcuure-dashboard.vercel.app', 'https://naxcuure-dashboard.onrender.com', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
